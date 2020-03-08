@@ -1,2 +1,2 @@
 # OOXML-MalClassifier
-Parse Microsoft Office especially on OOXML
+Parse OOXML and Detect Malicious Objects especially on Microsoft Office
