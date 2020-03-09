@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Check Malicious External Object Samples
+# Check Malicious External Object
 import os
 import re
 import xml.etree.ElementTree as etree
@@ -46,7 +46,6 @@ class ExternalsMethod(object):
     def check_dynamic_load_externals(self, unzip_dir, office_type=""):
         ret = False
         for (root, _, files) in os.walk(unzip_dir):
-            # print(root, files)
             for filename in files:
                 # dir search and find .xml
                 _, ext = os.path.splitext(filename)
@@ -78,15 +77,6 @@ class ExternalsMethod(object):
 
     # 2     CVE-2017-0199 (1)
     def get_exteranl_ole_link_type(self, unzip_dir, office_type=""):
-        """
-        Condition:
-            targetMode = Exteranl
-            oleObject = Type:Link
-            External_r_id == OleObject_id
-            Type=Link, LinkType=EnhancedMetaFile
-        :param unzip_dir:
-        :return:
-        """
         # Precondition
         if office_type == 'xl':
             return False
@@ -138,15 +128,6 @@ class ExternalsMethod(object):
 
     # 2     CVE-2017-0199 (2)
     def get_exteranl_ole_link(self, unzip_dir, office_type=""):
-        """
-        Condition:
-            only on pptx(ppsx)
-            targetMode = Exteranl
-            oleObject = Type:Link
-            External_r_id == OleObject_id
-        :param unzip_dir:
-        :return:
-        """
         # Precondition
         if office_type != 'ppt':
             return False

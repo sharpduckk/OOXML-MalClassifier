@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Check Malicious ActiveX Samples
+# Check Malicious ActiveX
 import os
 import re
 import xml.etree.ElementTree as etree
@@ -56,8 +56,9 @@ class ActiveXMethod(object):
                         for stream in ole_.listdir():
                             if stream[-1] == "Contents":
                                 content = ole_.openstream(stream).read()
-                                if content[8:11] == b'FWS': ret = True
-                if ret is True: break
+                                if content[8:11] == b'FWS':
+                                    ret = True
+                                    break
         return ret
 
     # 9     CVE-2012-1856
@@ -67,7 +68,6 @@ class ActiveXMethod(object):
             return False
         ret = False
         flag_mscomctl = False
-        flag_persist_storage = False
         flag_match_min_fileSize = False
         for (root, _, files) in os.walk(unzip_dir):
             for filename in files:

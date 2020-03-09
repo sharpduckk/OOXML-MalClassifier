@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Check Malicious VBA(Macro) Samples
+# Check Malicious VBA(Macro)
 import os
 import re
 import logging

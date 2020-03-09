@@ -1,16 +1,11 @@
 # -*- coding: utf-8 -*-
+# Check Malicious EPS Object
 import os
 import re
 
 
 # 11	CVE-2015-2545
 def check_abnormal_eps_exploit_object(unzip_dir, office_type=""):
-    """
-    Condition:
-        EPS
-    :param unzip_dir:
-    :return:
-    """
     # Precondition
     if office_type != 'word':
         return False

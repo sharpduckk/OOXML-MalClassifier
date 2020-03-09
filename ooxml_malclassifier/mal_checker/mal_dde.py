@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Check Malicious DDE Samples
+# Check Malicious DDE
 import os, re
 import xml
 import xml.etree.ElementTree as etree
@@ -86,8 +86,6 @@ class DdeMethod(object):
                                 ddelink_dict[filename]['ddeService'] = ddeLink.attrib['ddeService']
                                 ddelink_dict[filename]['ddeTopic'] = ddeLink.attrib['ddeTopic']
                                 ret = True
-                                break
-                        if ret is True: break
                     except xml.etree.ElementTree.ParseError as parse_err:
                         logging.warning(parse_err)
                         logging.warning("Error path: {file_path}".format(file_path=file_path))
@@ -128,6 +126,7 @@ class DdeMethod(object):
                     if re.search('DDE ', instr_text) or re.search(' DDE', instr_text) or re.search('DDEAUTO', instr_text):
                         dde_matched[key_] = instr_text
                         ret = True
+                        break
                 self.dde_instr_dict = dde_matched
             else:
                 self.dde_instr_dict = {}
@@ -135,6 +134,7 @@ class DdeMethod(object):
             for run_str in self.dde_run_str:
                 if re.search(run_str, instr_text, re.IGNORECASE):
                     ret = True
+                    break
         return ret
 
     # 3     CVE-2016-7262 # only on excel
@@ -148,7 +148,6 @@ class DdeMethod(object):
         if office_type != 'xl':
             return False
         ret = False
-        flag_ddeservice = False
         for (root, _, files) in os.walk(unzip_dir):
             for filename in files:
                 # dir search and find .xml
@@ -158,15 +157,13 @@ class DdeMethod(object):
                     if len(self.ddelink_dict) > 0:
                         for _, ddelink in self.ddelink_dict.items():
                             if ddelink['ddeService'].lower() in ('cmd', 'powershell', 'dde'):
-                                flag_ddeservice = True
+                                ret = True
+                                break
                             run_str = ['cmd.exe', 'powershell.exe', 'bitsadmin', 'calc.exe', 'certutil']
                             if "DDE " in ddelink['ddeTopic']:
                                 ddelink['ddeTopic'] = self.unquote(ddelink['ddeTopic'])
                             for str_ in run_str:
                                 if str_ in ddelink['ddeTopic'].lower():
-                                    flag_ddeservice = True
+                                    ret = True
                                     break
-                if flag_ddeservice:
-                    ret = True
-                    break
         return ret
