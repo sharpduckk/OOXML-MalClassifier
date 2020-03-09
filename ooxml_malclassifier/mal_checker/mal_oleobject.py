@@ -33,7 +33,6 @@ class OleObjectMethod(object):
                                     content = ole_.openstream(stream).read()
                                     stream = oleobj.OleNativeStream(content)
                                     if os.path.splitext(stream.src_path)[1].lower() in self.susp_ext:
-                                        # print("mal ext: ", os.path.splitext(stream.src_path)[1].lower())
                                         ret = True
                                         break
                                 except IndexError as indErr:

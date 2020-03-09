@@ -2,7 +2,7 @@
 """
     Parse OOXML structure.
     module author:: Aleksandar Erkalovic <aerkalov@gmail.com>
-    https://github.com/booktype/python_ooxml/blob/master/ooxml/parse.py
+    https://github.com/booktype/python-ooxml/blob/master/ooxml/parse.py
 """
 from lxml import etree
 from ooxml_malclassifier import NAMESPACES
