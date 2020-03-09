@@ -107,7 +107,6 @@ class OleObjectMethod(object):
         for (root, _, files) in os.walk(unzip_dir):
             for filename in files:
                 if bool(re.match('oleObject\d{1,2}.bin', filename)):
-                    # https://github.com/cuckoosandbox/community/blob/master/modules/signatures/extractor/ole.py
                     if filename not in self.oleObject_bin.keys():
                         filepath = os.path.join(root, filename)
                         with open(filepath, "r+b") as f:
