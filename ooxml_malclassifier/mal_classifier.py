@@ -194,6 +194,10 @@ class OoxmlClassifier(object):
             self.file_info['CVE'] = 'CVE-2017-11882'
             self.file_info['description'] = 'equation_editor_harmful_face2'
             self.file_info['result'] = 'malicious'
+        elif oleObject_method.get_external_ole_packagershell(self.dst_unzip, self.file_info['officeType']):
+            self.file_info['CVE'] = 'CVE-2014-6352'
+            self.file_info['description'] = 'external_ole_packagershell'
+            self.file_info['result'] = 'malicious'
         elif oleObject_method.check_ole_swf_exploitable_data(self.dst_unzip, self.file_info['officeType']):
             # self.file_info['CVE'] = 'CVE-2018-4878'
             self.file_info['description'] = 'ole_swf_exploitable_data'
@@ -211,12 +215,12 @@ class OoxmlClassifier(object):
     def check_malicious_activex(self):
         start = timeit.default_timer()
         activeX_method = mal_activex.ActiveXMethod()
-        if activeX_method.check_activeX_abnormal_number(self.dst_unzip, self.file_info['officeType']):
-            self.file_info['description'] = 'activeX_abnormal_number'
-            self.file_info['result'] = 'malicious'
-        elif activeX_method.check_activeX_mscomctl(self.dst_unzip, self.file_info['officeType']):
+        if activeX_method.check_activeX_mscomctl(self.dst_unzip, self.file_info['officeType']):
             self.file_info['CVE'] = 'CVE-2012-1856'
             self.file_info['description'] = 'activeX_ole_contents_swf'
+            self.file_info['result'] = 'malicious'
+        elif activeX_method.check_activeX_abnormal_number(self.dst_unzip, self.file_info['officeType']):
+            self.file_info['description'] = 'activeX_abnormal_number'
             self.file_info['result'] = 'malicious'
         elif activeX_method.check_activeX_ole_contents_swf(self.dst_unzip, self.file_info['officeType']):
             # self.file_info['CVE'] = 'CVE-2018-4878'
@@ -265,10 +269,6 @@ class OoxmlClassifier(object):
             self.file_info['CVE'] = 'CVE-2017-0199'  # suspicious
             self.file_info['description'] = 'exteranl_ole_link_type'
             self.file_info['result'] = 'malicious'
-        elif self.externals_method.get_external_ole_packagershell(self.dst_unzip, self.file_info['officeType']):
-            self.file_info['CVE'] = 'CVE-2014-6352'
-            self.file_info['description'] = 'external_ole_packagershell'
-            self.file_info['result'] = 'malicious'
         elif self.externals_method.check_external_framset_linkedToFile(self.dst_unzip, self.file_info['officeType']):
             self.file_info['description'] = 'external_framset_linkedToFile'
             self.file_info['result'] = 'malicious'
@@ -281,8 +281,6 @@ class OoxmlClassifier(object):
     def detect_malicious_properties(self):
         """
         Call mal checker for each object type (e.g. macro)
-
-        :return:
         """
         if self.dst_unzip == "" or self.file_info['officeType'] == "":  # not set value yet.
             return False

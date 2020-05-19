@@ -237,61 +237,6 @@ class ExternalsMethod(object):
                     break
         return ret
 
-    # 7     CVE-2014-6352
-    def get_external_ole_packagershell(self, unzip_dir, office_type=""):
-        # Precondition
-        if office_type != 'ppt':
-            return False
-        ret = False
-        r_id = ""
-        flag_package_shell = False
-        flag_cmd = False
-        flag_embed = False
-        flag_embedding_ole = False
-        for (root, _, files) in os.walk(unzip_dir):
-            for filename in files:
-                # dir search and find .xml
-                file_path = os.path.join(root, filename)
-                if bool(re.match('slide\d{1}.xml', filename)):
-                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                        xml_txt = f.read()
-                    xp = xml_parser.XmlParser()
-                    utf8_parser = etree.XMLParser(encoding='utf-8')
-                    ooxml = etree.fromstring(xml_txt, parser=utf8_parser)
-                    for elem in ooxml.iter():
-                        p_ole = elem.find(_name('{{{p}}}oleObj'))
-                        if p_ole is not None:  # If it has OLE object
-                            elements = xp.parse_object(p_ole)
-                            if elements['attrib']['progId'] == 'Package':
-                                flag_package_shell = True
-                            r_id = elements['attrib'][_name('{{{r}}}id')]
-                            for sub in elements['sub']:
-                                if sub.tag == _name('{{{p}}}embed'):
-                                    flag_embed = True
-                                    break
-                        p_cmd = elem.find(_name('{{{p}}}cmd'))
-                        if p_cmd is not None:  # If it has OLE object
-                            elements = xp.parse_object(p_cmd)
-                            if 'type' in elements['attrib'].keys() and 'cmd' in elements['attrib'].keys():
-                                if elements['attrib']['type'] == 'verb' and elements['attrib']['cmd'] == '3':
-                                    flag_cmd = True
-                elif bool(re.match('slide\d{1}.xml.rels', filename)):
-                    if filename not in self.external_rels.keys():
-                        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                            xml_txt = f.read().encode("utf-8")
-                        xp = xml_parser.XmlParser()
-                        xp.parse_relationship(xml_txt)
-                        self.external_rels[filename] = xp.relationships
-                    for relationship in self.external_rels[filename]:
-                        if relationship['id'] == r_id:
-                            decode_url = urllib.parse.unquote(relationship['target'])
-                            if "../embeddings/oleObject" in decode_url:
-                                flag_embedding_ole = True
-                if flag_package_shell and flag_embed and flag_cmd and flag_embedding_ole:
-                    ret = True
-                    break
-        return ret
-
     def check_external_framset_linkedToFile(self, unzip_dir, office_type=""):
         # Precondition
         if office_type != 'word':
