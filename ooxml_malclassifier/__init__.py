@@ -1,19 +1,9 @@
 # -*- coding: utf-8 -*-
 
-VERSION = '0.13+'
-
-
 def _name(name):
-    """
-    Returns full name for the attribute.
-    It checks predefined namespaces used in OOXML documents.
-    >>> _name('{{{w}}}rStyle')
-    '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}rStyle'
-    """
-    return name.format(**NAMESPACES)
+    return name.format(**XMLSPEC)
 
-
-NAMESPACES = {
+XMLSPEC = {
     'mo': 'http://schemas.microsoft.com/office/mac/office/2008/main',
     'o': 'urn:schemas-microsoft-com:office:office',
     've': 'http://schemas.openxmlformats.org/markup-compatibility/2006',
@@ -57,4 +47,5 @@ NAMESPACES = {
     'dcterms': 'http://purl.org/dc/terms/',
     # --------------------
     'ax': 'http://schemas.microsoft.com/office/2006/activeX',
+    'vt': "http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes",
 }
