@@ -161,6 +161,8 @@ class OoxmlClassifier(object):
                 logging.warning("ERR: {oe}".format(oe=oe))
                 ret_flag = False
             return ret_flag
+        else:
+            self.file_info['result'] = 'NotOOXML'
 
     def check_malicious_macro(self):
         start = timeit.default_timer()
@@ -324,7 +326,7 @@ class OoxmlClassifier(object):
         # If it has any of objects
         if any([True if len(flag_) else False for _, flag_ in self.file_info['objects'].items()]):
             self.file_info['result'] = 'suspicious'
-        else:
+        elif self.file_info['result'] is None:
             self.file_info['result'] = 'normal'
 
     def get_result(self):
@@ -343,7 +345,8 @@ def _classifier(root, file_, manager_dict):
     classifier.detect_malicious_properties()
     if 'verbose' in manager_dict.keys():
         print(classifier.file_info)
-    manager_dict['file_info'][classifier.file_info['md5']] = classifier.file_info
+    if classifier.file_info['result'] != 'NotOOXML':
+        manager_dict['file_info'][classifier.file_info['md5']] = classifier.file_info
     if classifier.file_info['result'] == 'malicious':
         manager_dict['malicious'].append(file_)
     elif classifier.file_info['result'] == 'suspicious':
