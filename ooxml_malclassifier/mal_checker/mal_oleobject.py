@@ -56,22 +56,21 @@ class OleObjectMethod(object):
         bin_docfile = b"\xD0\xCF\x11\xE0"
         for (root, _, files) in os.walk(unzip_dir):
             for filename in files:
-                if bool(re.match('oleObject\d{1,2}.bin', filename)):
-                    if filename not in self.oleObject_bin.keys():
-                        filepath = os.path.join(root, filename)
-                        with open(filepath, "r+b") as f:
-                            self.oleObject_bin[filename] = f.read()
-                    if self.oleObject_bin[filename][:4] == bin_docfile:
-                        ole_ = olefile.OleFileIO(self.oleObject_bin[filename])
-                        for stream in ole_.listdir():
-                            if stream[-1].lower() == 'equation native':
-                                try:
-                                    if ole_.openstream(stream).read()[0x23] == 8:
-                                        ret = True
-                                        break
-                                except IndexError as indErr:
-                                    logging.warning("check_equation_editor_harmful_face: {indErr}".format(indErr=indErr))
-                                    logging.warning("[filename]: {unzip_dir}".format(unzip_dir=unzip_dir))
+                if filename not in self.oleObject_bin.keys():
+                    filepath = os.path.join(root, filename)
+                    with open(filepath, "r+b") as f:
+                        self.oleObject_bin[filename] = f.read()
+                if self.oleObject_bin[filename][:4] == bin_docfile:
+                    ole_ = olefile.OleFileIO(self.oleObject_bin[filename])
+                    for stream in ole_.listdir():
+                        if stream[-1].lower() == 'equation native':
+                            try:
+                                if ole_.openstream(stream).read()[0x23] == 8:
+                                    ret = True
+                                    break
+                            except IndexError as indErr:
+                                logging.warning("check_equation_editor_harmful_face: {indErr}".format(indErr=indErr))
+                                logging.warning("[filename]: {unzip_dir}".format(unzip_dir=unzip_dir))
         return ret
 
     def check_equation_editor_harmful_face2(self, unzip_dir, office_type=""):
@@ -80,24 +79,23 @@ class OleObjectMethod(object):
         bin_eqn_clsid = b"\x02\xCE\x02\x00\x00\x00\x00\x00\xC0\x00\x00\x00\x00\x00\x00\x46"
         for (root, _, files) in os.walk(unzip_dir):
             for filename in files:
-                if bool(re.match('oleObject\d{1,2}.bin', filename)):
-                    if filename not in self.oleObject_bin.keys():
-                        filepath = os.path.join(root, filename)
-                        with open(filepath, "r+b") as f:
-                            self.oleObject_bin[filename] = f.read()
-                    if self.oleObject_bin[filename][:4] == bin_docfile:
-                        if re.search(bin_eqn_clsid, self.oleObject_bin[filename]) is not None:
-                            ole_ = olefile.OleFileIO(self.oleObject_bin[filename])
-                            for stream in ole_.listdir():
-                                if stream[-1].lower() == "\x01ole10native" or stream[-1].lower() == 'equation native':
-                                    try:
-                                        content = ole_.openstream(stream).read(4)
-                                        if content != b'\x1C\x00\x00\x00':
-                                            ret = True
-                                            break
-                                    except IndexError as indErr:
-                                        logging.warning("check_equation_editor_harmful_face: {indErr}".format(indErr=indErr))
-                                        logging.warning("[filename]: {unzip_dir}".format(unzip_dir=unzip_dir))
+                if filename not in self.oleObject_bin.keys():
+                    filepath = os.path.join(root, filename)
+                    with open(filepath, "r+b") as f:
+                        self.oleObject_bin[filename] = f.read()
+                if self.oleObject_bin[filename][:4] == bin_docfile:
+                    if re.search(bin_eqn_clsid, self.oleObject_bin[filename]) is not None:
+                        ole_ = olefile.OleFileIO(self.oleObject_bin[filename])
+                        for stream in ole_.listdir():
+                            if stream[-1].lower() == "\x01ole10native" or stream[-1].lower() == 'equation native':
+                                try:
+                                    content = ole_.openstream(stream).read(4)
+                                    if content != b'\x1C\x00\x00\x00':
+                                        ret = True
+                                        break
+                                except IndexError as indErr:
+                                    logging.warning("check_equation_editor_harmful_face: {indErr}".format(indErr=indErr))
+                                    logging.warning("[filename]: {unzip_dir}".format(unzip_dir=unzip_dir))
         return ret
 
     # 7     CVE-2014-6352

@@ -289,8 +289,7 @@ class OoxmlClassifier(object):
 
         if self.file_info['result'] == 'suspicious' and self.file_info['objects']['Macro']:
             self.check_malicious_macro()
-        if self.file_info['result'] == 'suspicious' and self.file_info['objects']['OLE']:
-            self.check_malicious_oleobject()
+        self.check_malicious_oleobject()
         if self.file_info['result'] == 'suspicious' and self.file_info['objects']['activeX']:
             self.check_malicious_activex()
         if self.file_info['result'] == 'suspicious' and self.file_info['objects']['DDE']:
