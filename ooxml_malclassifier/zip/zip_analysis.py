@@ -419,8 +419,8 @@ class Zip(object):
                 if field_name in cd.header \
                         and l.header[field_name] != cd.header[field_name]:
                     self.logger.error('%s field of %s(%d) and %s(%d) is wrong!'
-                                      % (field_name, LocalFileHeader.__class__.__name__, l.index
-                                         , CentralDirectory.__class__.__name__, cd.index))
+                                      % (field_name, LocalFileHeader.__name__, l.index
+                                         , CentralDirectory.__name__, cd.index))
 
     def detect_structure_anomaly(self):
         # End of Central Directory
