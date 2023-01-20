@@ -333,7 +333,7 @@ class OoxmlClassifier(object):
     def get_zip_analysis(self):
         logger_ = logger.ValidationLogger(self.file_path)
         zip_analysis.Zip(self.file_path, logger_)
-        self.file_info['zip'] = logger_.data
+        self.file_info['zip'] = logger_.data_summary
 
     def get_result(self):
         pass

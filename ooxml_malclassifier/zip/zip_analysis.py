@@ -170,7 +170,7 @@ class LocalFileHeader(Parser):
             Compression(self.header['compression_method'])
         except Exception:
             self.logger.error("Unknown compression method in %s(%d) found!" % (
-                __class__.__name__, self.index))
+                __class__.__name__, self.index), extra={"type": "Unknown compression method"})
 
         if self.header["extra_len"] > 0:
             self.logger.warning("Extra Field in %s(%d) found!" % (
@@ -186,7 +186,7 @@ class LocalFileHeader(Parser):
                         __class__.__name__, self.index))
                     if extra_field.entropy() > 0:
                         self.logger.error("Hidden data in Extra Field in %s(%d) found!" % (
-                            __class__.__name__, self.index))
+                            __class__.__name__, self.index), extra={"type": "Hidden data in extra field"})
 
         # File Data Validation
         if self.header['compression_method'] > 0:
@@ -195,13 +195,13 @@ class LocalFileHeader(Parser):
 
                 if self.header['crc32'] != zlib.crc32(decompressed_data):
                     self.logger.error("CRC32 of %s(%d) is wrong!" % (
-                        __class__.__name__, self.index))
+                        __class__.__name__, self.index), extra={"type": "Wrong CRC32"})
                 if self.header['uncompressed_size'] != len(decompressed_data):
                     self.logger.error("Uncompressed Size of %s(%d) is wrong!" % (
-                        __class__.__name__, self.index))
+                        __class__.__name__, self.index), extra={"type": "Wrong uncompressed size"})
             except Exception:
                 self.logger.error("Data validation of %s(%d) failed!" % (
-                    __class__.__name__, self.index))
+                    __class__.__name__, self.index), extra={"type": "Failed Data validation"})
 
     def deflate(self, data):
         zlibbed_data = zlib.compress(data)
@@ -261,7 +261,7 @@ class CentralDirectory(Parser):
             Compression(self.header['compression_method'])
         except Exception:
             self.logger.error("Unknown compression method in %s(%d) found!" % (
-                __class__.__name__, self.index))
+                __class__.__name__, self.index), extra={"type": "Unknown compression method"})
 
         if self.header["extra_len"] > 0:
             self.logger.warning("Extra Field in %s(%d) found!" % (
@@ -277,7 +277,7 @@ class CentralDirectory(Parser):
                         __class__.__name__, self.index))
                     if extra_field.entropy() > 0:
                         self.logger.error("Hidden data in Extra Field in %s(%d) found!" % (
-                            __class__.__name__, self.index))
+                            __class__.__name__, self.index), extra={"type": "Hidden data in extra field"})
 
             hidden_msg(self.logger, self.index, self.header
                        , 'comment', 'comment_len', __class__.__name__, True)
@@ -380,14 +380,16 @@ class Zip(object):
     def validate(self):
         start_header_offset = self.local_file_headers[0].start_pos
         if start_header_offset > 0:
-            self.logger.error("Inserted data found! (Data: %s)" % self.readBytes(0, start_header_offset))
+            self.logger.error("Inserted data found! (Data: %s)" % self.readBytes(0, start_header_offset),
+                              extra={"type": "Inserted data"})
 
         lfh_count = len(self.local_file_headers)
         cd_count = len(self.central_directories)
         if lfh_count != cd_count:
             self.logger.error('The number of %s(%d) and %s(%d) is wrong!'
                               % (LocalFileHeader.__name__, lfh_count
-                                 , CentralDirectory.__name__, cd_count))
+                                 , CentralDirectory.__name__, cd_count)
+                              , extra={"type": "Wrong number of LocalFileHeader and CentralDirectory"})
 
         self.detect_structure_anomaly()
         self.cross_validation()
@@ -397,8 +399,8 @@ class Zip(object):
         is_file_end = self.get_file_size() == eocd_end_offset
         if not is_file_end:
             self.logger.error("Appended data found! (Data: %s)"
-                              % self.readBytes(eocd_end_offset
-                                               , self.get_file_size() - eocd_end_offset)[:100])
+                              % self.readBytes(eocd_end_offset, self.get_file_size() - eocd_end_offset)[:100]
+                              , extra={"type": "Append data"})
 
 
     def cross_validation(self):
@@ -420,14 +422,15 @@ class Zip(object):
                         and l.header[field_name] != cd.header[field_name]:
                     self.logger.error('%s field of %s(%d) and %s(%d) is wrong!'
                                       % (field_name, LocalFileHeader.__name__, l.index
-                                         , CentralDirectory.__name__, cd.index))
+                                         , CentralDirectory.__name__, cd.index)
+                                      , extra={"type": "Failed cross validation"})
 
     def detect_structure_anomaly(self):
         # End of Central Directory
         central_dir_offset = self.end_of_central_directory.header["central_dir_offset"]
         real_central_dir_offset = self.central_directories[0].start_pos
         if central_dir_offset != real_central_dir_offset:
-            self.logger.error('CentralDirectory anomaly found.')
+            self.logger.error('CentralDirectory anomaly found.', extra={"type": "Structure anomaly"})
 
         offset_mapping = {}
         for h in self.local_file_headers:
@@ -439,17 +442,20 @@ class Zip(object):
                 if offset_mapping[offset][1] is None:
                     offset_mapping[offset] = (offset_mapping[offset][0], c)
                 else:
-                    self.logger.error('%s(%d) structure anomaly found.(duplicated)' % (c.__class__.__name__, c.index))
+                    self.logger.error('%s(%d) structure anomaly found.(duplicated)' % (c.__class__.__name__, c.index)
+                                      , extra={"type": "Structure anomaly"})
             else:
                 self.logger.error('%s(%d) structure anomaly found.(not found LocalFileHeader)'
-                                  % (c.__class__.__name__, c.index))
+                                  % (c.__class__.__name__, c.index)
+                                  , extra={"type": "Structure anomaly"})
 
         for o in offset_mapping:
             c = offset_mapping[o][1]
             if c is None:
                 h = offset_mapping[o][0]
                 self.logger.error('%s(%d) structure anomaly found. (not found CentralDirectory)'
-                                  % (h.__class__.__name__, h.index))
+                                  % (h.__class__.__name__, h.index)
+                                  , extra={"type": "Structure anomaly"})
 
     def detect_file_slack(self):
         lfh_count = len(self.local_file_headers)
@@ -462,7 +468,7 @@ class Zip(object):
                 error_msg = 'File data slack in %s(%d) found!' % (prev_header.__class__.__name__, prev_header.index)
                 if next - prev > 0:
                     error_msg += " (Data: %s)" % (self.readBytes(prev, next - prev))[:10]
-                self.logger.error(error_msg)
+                self.logger.error(error_msg, extra={"type": "Data slack"})
             prev_header = header
             prev = header.end_offset()
 
