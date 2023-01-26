@@ -19,6 +19,7 @@ from ooxml_malclassifier.mal_checker import mal_dde
 from ooxml_malclassifier.mal_checker import mal_eps
 from ooxml_malclassifier.mal_checker import mal_externals
 
+from zip import zip_analysis, logger
 
 class OoxmlClassifier(object):
     """
@@ -45,6 +46,7 @@ class OoxmlClassifier(object):
             },  # e.g. dde, ole..
             'CVE': "",  # CVE-2017-11882
             'description': "",
+            'zip': "",
         }
         self.analysis_result = None  # True(Success), False(Fail), None(not yet)
         # Analysis Data
@@ -328,6 +330,11 @@ class OoxmlClassifier(object):
         elif self.file_info['result'] is None:
             self.file_info['result'] = 'normal'
 
+    def get_zip_analysis(self):
+        logger_ = logger.ValidationLogger(self.file_path)
+        zip_analysis.Zip(self.file_path, logger_)
+        self.file_info['zip'] = logger_.data_summary
+
     def get_result(self):
         pass
 
@@ -342,6 +349,8 @@ def _classifier(root, file_, manager_dict):
     classifier.get_object_properties()
     # 3) Detect malicious object with CVE vulnerability case
     classifier.detect_malicious_properties()
+    # 4) Detect malicious zip structure
+    classifier.get_zip_analysis()
     if 'verbose' in manager_dict.keys():
         print(classifier.file_info)
     if classifier.file_info['result'] != 'NotOOXML':
